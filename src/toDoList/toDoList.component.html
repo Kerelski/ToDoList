@@ -1,0 +1,98 @@
+<div class="wrapper">
+  <header [ngClass]="{ 'activeScreen': powerOn, 'inactiveScreen': !powerOn }">
+    <h1 *ngIf="powerOn">Your to do list</h1>
+    <h4 *ngIf="powerOn">Plan your work better</h4>
+  </header>
+
+  <div class="managementContainer">
+    <section [ngClass]="{ 'activeScreen': powerOn, 'inactiveScreen': !powerOn }" id="searchingScreen">
+      <div *ngIf="powerOn" id="addingContainer">
+        <input  id="addingInput" class="press-start-2p-regular textInput" [(ngModel)]="inputValue" placeholder="Describe your task">
+        <button class="press-start-2p-regular" (click)="addTask()">Add</button>
+        <button class="press-start-2p-regular" (click)="sortByDate()">Sort by Date {{ sortByDateAsc ? '↑' : '↓' }}</button>
+      </div>
+      <div *ngIf="powerOn" id="filteringContainer">
+        <input id="searchingInput"  class="press-start-2p-regular textInput" [(ngModel)]="filterText" placeholder="Search">
+        <div>
+          <label for="startDate">From</label>
+          <input class="press-start-2p-regular date" id="startDate" type="date" [(ngModel)]="startDate">
+        </div>
+        <div>
+          <label for="endDate">To</label>
+          <input class="press-start-2p-regular date" id="endDate" type="date" [(ngModel)]="endDate">
+        </div>
+
+      </div>
+
+    </section>
+    <section id="powerContainer">
+      <button id="powerButton" (click)="togglePowerOn()" [ngClass]="{ 'powerButtonOn': powerOn, 'powerButtonOff': !powerOn }">
+        <i class="fa-solid fa-power-off"></i>
+      </button>
+    </section>
+    <section [ngClass]="{ 'activeScreen': powerOn, 'inactiveScreen': !powerOn }" id="selectScreen">
+      <h3 *ngIf="powerOn">Selected task</h3>
+      <ul *ngIf="powerOn">
+        <list-task
+          *ngIf="selectedTask"
+          [task]="selectedTask"
+          (delete)="removeTask(selectedTask)"
+          (statusChanged)="changeStatus(selectedTask, $event)" ></list-task>
+      </ul>
+      <div class="buttons" *ngIf="selectedTask && powerOn">
+        <button class="press-start-2p-regular" *ngIf="selectedTask.status === 'Pending'" (click)="changeStatus(selectedTask, 'In Progress')">
+          Start task
+        </button>
+        <button class="press-start-2p-regular" *ngIf="selectedTask.status === 'In Progress'" (click)="changeStatus(selectedTask, 'Completed')">
+          Finish task
+        </button>
+        <button class="press-start-2p-regular" *ngIf="selectedTask.status === 'Pending'" (click)="removeTask(selectedTask)">
+          Delete
+        </button>
+        <button class="press-start-2p-regular" (click)="clearTaskSelected()">Cancel</button>
+      </div>
+
+      <div *ngIf="!selectedTask">
+        <p *ngIf="powerOn">No task selected.</p>
+      </div>
+    </section>
+  </div>
+
+  <div [ngClass]="{ 'activeScreen': powerOn, 'inactiveScreen': !powerOn }" class="mainScreen">
+    <section class="list">
+      <div *ngIf="powerOn" class="screenColumn">
+        <h3>Pending tasks</h3>
+        <ul>
+          <list-task
+            *ngFor="let task of filteredPendingTasks"
+            [task]="task"
+            (delete)="removeTask(task)"
+            (statusChanged)="changeStatus(task, $event)"
+            (selected)="onTaskSelected(task)"></list-task>
+        </ul>
+      </div>
+      <div *ngIf="powerOn" class="screenColumn">
+        <h3>Tasks in progress</h3>
+        <ul>
+          <list-task
+            *ngFor="let task of filteredInProgressTasks"
+            [task]="task"
+            (statusChanged)="changeStatus(task, $event)"
+            (selected)="onTaskSelected(task)"></list-task>
+        </ul>
+      </div>
+      <div *ngIf="powerOn" class="screenColumn">
+        <h3>Completed tasks</h3>
+        <ul>
+          <list-task
+            *ngFor="let task of filteredCompletedTasks"
+            [task]="task"
+            (selected)="onTaskSelected(task)"></list-task>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+
+
+</div>

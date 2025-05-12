@@ -1,0 +1,15 @@
+
+<li (click)="onSelect()" >
+  {{task.title}}
+  <span *ngIf="task.status === 'Pending'">
+    (created at: {{ task.date | date: 'dd-MM-yyyy, HH:mm' }})
+  </span>
+  <span *ngIf="task.status === 'In Progress'">
+    (started at: {{ task.date | date: 'dd-MM-yyyy, HH:mm' }})
+  </span>
+  <span *ngIf="task.status === 'Completed'">
+    (finished at: {{ task.date | date: 'dd-MM-yyyy, HH:mm' }})
+  </span>
+</li>
+
+

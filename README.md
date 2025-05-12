@@ -1,4 +1,5 @@
 # ToDoList
+## The project presents a simple toDoList stylized as a retro computer terminal/display
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.11.
 
