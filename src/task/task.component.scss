@@ -3,6 +3,10 @@ li {
   padding: 15px 0;
   border-bottom: dashed 2px white;
   text-shadow: white 0 0 3px;
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
+  overflow-x: hidden;
 
   &:hover {
     color: #069309;

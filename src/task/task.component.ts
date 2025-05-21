@@ -18,14 +18,8 @@ export class TaskComponent{
   @Output() delete: EventEmitter<void> = new EventEmitter<void>();
   @Output() statusChanged: EventEmitter<Status> = new EventEmitter<Status>();
   @Output() selected = new EventEmitter<any>();
-  deleteTask(): void{
-    this.delete.emit();
-  }
   onSelect(): void{
     this.selected.emit(this.task);
-  }
-  changeStatus(status: Status): void{
-    this.statusChanged.emit(status);
   }
 
 }
