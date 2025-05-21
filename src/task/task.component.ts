@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {TaskData, Status} from '../toDoList/toDoList.component';
 import {DatePipe, NgIf} from '@angular/common';
+import {TaskService, TaskData, Status} from '../app/services/task.service';
 
 @Component({
   selector: 'list-task',
@@ -15,11 +15,11 @@ import {DatePipe, NgIf} from '@angular/common';
 export class TaskComponent{
 
   @Input() task!: TaskData;
-  @Output() delete: EventEmitter<void> = new EventEmitter<void>();
-  @Output() statusChanged: EventEmitter<Status> = new EventEmitter<Status>();
-  @Output() selected = new EventEmitter<any>();
-  onSelect(): void{
+  @Output() selected = new EventEmitter<TaskData>();
+
+  onSelect(): void {
     this.selected.emit(this.task);
   }
+  constructor(private taskService: TaskService) {}
 
 }
