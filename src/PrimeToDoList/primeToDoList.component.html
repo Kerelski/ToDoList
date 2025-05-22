@@ -1,12 +1,11 @@
-<div class="p-card p-4 max-w-5xl mx-auto">
+<div class="min-h-screen flex flex-col gap-4">
 
-  <div class="flex items-center justify-between mb-6">
-    <div class="flex space-x-2">
+  <div class="flex  flex-col items-center justify-between mb-6 gap-3 py-4">
+    <h2 class="text-5xl font-semibold text-center flex-grow mx-4">Your To do List</h2>
+    <div class="flex self-start  space-x-2 gap-4">
       <p-button label="Back to classic" icon="pi pi-arrow-left" [rounded]="true" severity="info" (click)="goToClassicList()"></p-button>
       <p-button label="Toggle Dark Mode" icon="pi pi-moon" [rounded]="true" severity="contrast" (click)="toggleDarkMode()"></p-button>
     </div>
-    <h2 class="text-xl font-semibold text-center flex-grow mx-4">Your To do List</h2>
-    <div class="w-48"></div>
   </div>
 
   <div class="p-input-group mb-6 flex gap-2">
@@ -20,32 +19,36 @@
     <p-button label="Add" icon="pi pi-plus" [rounded]="true" (click)="addTask()" severity="success"></p-button>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div class="flex items-center gap-4">
     <input
       pInputText
       [(ngModel)]="filterText"
       placeholder="Search"
-      class="w-full"
+      class="flex-1 min-w-0"
     />
     <p-calendar
       [(ngModel)]="startDate"
       placeholder="From"
       dateFormat="yy-mm-dd"
       showIcon
-      class="w-full"
+      class="w-40 min-w-0"
     ></p-calendar>
     <p-calendar
       [(ngModel)]="endDate"
       placeholder="To"
       dateFormat="yy-mm-dd"
       showIcon
-      class="w-full"
+      class="w-40 min-w-0"
     ></p-calendar>
+    <p-button
+      label="Sort by Date"
+      pButtonIcon="pi pi-sort-alt"
+      [rounded]="true"
+      (click)="sortByDate()"
+      severity="secondary"
+    ></p-button>
   </div>
 
-  <div class="flex gap-2 mb-6">
-    <p-button label="Sort by Date" pButtonIcon="pi pi-sort-alt" [rounded]="true" (click)="sortByDate()" severity="secondary"></p-button>
-  </div>
 
   <p-accordion [multiple]="true">
     <p-accordion-panel value="0">
@@ -54,10 +57,10 @@
         <ng-container *ngIf="filteredPendingTasks | async as pendingTasks">
           <p *ngIf="!pendingTasks.length" class="p-text-muted">No tasks</p>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <p-card *ngFor="let task of pendingTasks" class="shadow-md hover:bg-gray-100 cursor-pointer transition-colors duration-300">
+          <div class="flex flex-col gap-4">
+            <p-card *ngFor="let task of pendingTasks" class="shadow-md hover: cursor-pointer">
               <ng-template pTemplate="title">
-                {{ task.title }}
+                <span class="break-words whitespace-normal">{{ task.title }}</span>
               </ng-template>
               <ng-template pTemplate="content">
                 <p><strong>Last updated:</strong> {{ task.date | date : 'short' }}</p>
@@ -79,10 +82,10 @@
         <ng-container *ngIf="filteredInProgressTasks | async as inProgressTasks">
           <p *ngIf="!inProgressTasks.length" class="p-text-muted">No tasks</p>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="flex flex-col gap-4">
             <p-card *ngFor="let task of inProgressTasks" class="shadow-md">
               <ng-template pTemplate="title">
-                {{ task.title }}
+                <span class="break-words whitespace-normal">{{ task.title }}</span>
               </ng-template>
               <ng-template pTemplate="content">
                 <p><strong>Last updated:</strong> {{ task.date | date : 'short' }}</p>
@@ -103,10 +106,10 @@
         <ng-container *ngIf="filteredCompletedTasks | async as completedTasks">
           <p *ngIf="!completedTasks.length" class="p-text-muted">No tasks</p>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="flex flex-col gap-4">
             <p-card *ngFor="let task of completedTasks" class="shadow-md">
               <ng-template pTemplate="title">
-                {{ task.title }}
+                <span class="break-words whitespace-normal">{{ task.title }}</span>
               </ng-template>
               <ng-template pTemplate="content">
                 <p><strong>Last updated:</strong> {{ task.date | date : 'short' }}</p>
