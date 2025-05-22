@@ -26,10 +26,6 @@ export class TaskService {
     return this.tasksSubject.value;
   }
 
-  get selectedTask(): TaskData | null {
-    return this.selectedTaskSubject.value;
-  }
-
   setTasks(tasks: TaskData[]): void {
     this.tasksSubject.next(tasks);
   }

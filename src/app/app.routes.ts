@@ -1,11 +1,10 @@
 import { RouterModule, Routes } from '@angular/router';
 import {NgModule} from '@angular/core';
-import {ToDoListComponent} from '../toDoList/toDoList.component';
-import {PrimeToDoListComponent} from '../PrimeToDoList/primeToDoList.component';
 
 export const routes: Routes = [
-  {path: '', component: ToDoListComponent},
-  {path: 'prime', component: PrimeToDoListComponent},
+  {path: '', loadComponent: () => import('../toDoList/toDoList.component').then(m => m.ToDoListComponent)},
+  {path: 'prime', loadComponent: () =>
+      import('../PrimeToDoList/primeToDoList.component').then(m => m.PrimeToDoListComponent)},
 ];
 
 @NgModule({
