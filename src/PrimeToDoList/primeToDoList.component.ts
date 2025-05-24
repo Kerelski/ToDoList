@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
-import {NgClass, NgForOf, NgIf, CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import { NgForOf, NgIf, CommonModule} from '@angular/common';
+import { FormGroup, FormsModule, Validators} from '@angular/forms';
+import { FormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
 import {Router} from '@angular/router';
 import {TaskService, TaskData, Status} from '../app/services/task.service';
 import {Observable} from 'rxjs';
@@ -8,10 +9,13 @@ import { map } from 'rxjs/operators';
 import {InputTextModule} from 'primeng/inputtext';
 import {ButtonModule} from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
-import {CalendarModule} from 'primeng/calendar';
-import { DialogModule } from 'primeng/dialog';
+import { DatePickerModule } from 'primeng/datepicker';
 import { AccordionModule } from 'primeng/accordion';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import {Card} from 'primeng/card';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'prime-to-do-list',
@@ -24,10 +28,16 @@ import {Card} from 'primeng/card';
     NgForOf,
     InputTextModule,
     ButtonModule,
-    CalendarModule,
+    DatePickerModule,
     AccordionModule,
     DropdownModule,
+    InputGroupModule,
+    ToastModule,
+    ReactiveFormsModule,
     Card,
+  ],
+  providers: [
+    MessageService,
   ],
   standalone: true
 })
@@ -35,16 +45,34 @@ export class PrimeToDoListComponent {
   tasks$: Observable<TaskData[]>;
   sortByDateAsc: boolean;
   selectedTask$: Observable<TaskData | null>;
-  constructor(private router: Router, private taskService: TaskService) {
+  addForm: FormGroup;
+
+  constructor(private router: Router, private taskService: TaskService, private messageService: MessageService, private fb: FormBuilder) {
     this.tasks$ = this.taskService.tasks$
     this.sortByDateAsc = this.taskService.sortByDateAsc;
     this.selectedTask$= this.taskService.selectedTask$;
+    this.addForm = this.fb.group({
+      title: ['', [Validators.required, this.noOnlyDigitsAndMinLengthValidator]],
+    })
   }
-
-  inputValue: string = "";
   filterText: string = "";
   startDate: Date | null = null;
   endDate: Date | null = null;
+
+  noOnlyDigitsAndMinLengthValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value?.trim() ?? '';
+
+    const errors: ValidationErrors = {};
+
+    if (value.length < 3) {
+      errors['minLength'] = { requiredLength: 3, actualLength: value.length };
+    }
+    if (/^\d+$/.test(value)) {
+      errors['onlyDigits'] = true;
+    }
+
+    return Object.keys(errors).length ? errors : null;
+  }
 
   goToClassicList(): void {
     this.router.navigate(['']);
@@ -85,28 +113,53 @@ export class PrimeToDoListComponent {
   }
   removeTask(taskToRemove: TaskData): void{
     this.taskService.removeTask(taskToRemove);
+    this.messageService.add({
+      severity: 'success',
+      summary: "Task has been removed",
+      detail: `Task "${taskToRemove.title}" has been removed successfully.`
+    });
     this.clearTaskSelected();
   }
   changeStatus(task: TaskData, status: Status):void{
     this.taskService.updateTask(task, status);
+    this.messageService.add({
+      severity: 'success',
+      summary: "Task's status changed",
+      detail: `Task "${task.title}" was changed to "${status}".`
+    });
     this.clearTaskSelected()
   }
 
   sortByDate(): void {
     this.taskService.sortByDate();
+    this.messageService.add({
+      severity: 'info',
+      summary: this.sortByDateAsc ? 'Tasks sorted descending by date' : 'Tasks sorted ascending by date',
+    });
     this.sortByDateAsc = !this.sortByDateAsc;
   }
-  addTask(): void{
-    if(this.inputValue.trim()){
+  addTask(): void {
+    if (this.addForm.valid) {
+      const title = this.addForm.value.title!.trim();
       this.taskService.addTask({
-        title: this.inputValue.trim(),
+        title,
         date: new Date(),
-        status: "Pending",
+        status: 'Pending',
       });
-      this.inputValue = "";
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Task added',
+        detail: `Task "${title}" was added.`,
+      });
+      this.addForm.reset();
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Invalid input',
+        detail: `Task title cannot be empty, has to be at least 3 characters long and cannot has only digits.`,
+      });
     }
   }
-
 
   get filteredPendingTasks(): Observable<TaskData[]> {
     return this.tasks$.pipe(

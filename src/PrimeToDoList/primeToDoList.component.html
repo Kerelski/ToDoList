@@ -1,64 +1,77 @@
-<div class="min-h-screen flex flex-col gap-4">
-
-  <div class="flex  flex-col items-center justify-between mb-6 gap-3 py-4">
+<div class="min-h-screen flex flex-col gap-4 ">
+  <p-toast />
+  <div class="flex  flex-col items-center justify-between m-6 gap-3">
     <h2 class="text-5xl font-semibold text-center flex-grow mx-4">Your To do List</h2>
-    <div class="flex self-start  space-x-2 gap-4">
+  </div>
+
+  <div class="w-full flex flex-wrap items-center gap-4 p-6">
+
+    <div class="flex gap-4">
       <p-button label="Back to classic" icon="pi pi-arrow-left" [rounded]="true" severity="info" (click)="goToClassicList()"></p-button>
       <p-button label="Toggle Dark Mode" icon="pi pi-moon" [rounded]="true" severity="contrast" (click)="toggleDarkMode()"></p-button>
     </div>
+
+    <div class="flex flex-grow items-stretch gap-2 w-full sm:w-auto">
+      <form [formGroup]="addForm" (ngSubmit)="addTask()" class="flex flex-grow items-stretch gap-2 w-full sm:w-auto">
+        <p-inputgroup>
+          <input type="text"
+                 pInputText
+                 formControlName="title"
+                 placeholder="Describe your task..."
+                 class="flex-grow" />
+          <p-button label="Add" icon="pi pi-plus" [rounded]="true" (click)="addTask()" severity="success"></p-button>
+        </p-inputgroup>
+      </form>
+    </div>
+
   </div>
 
-  <div class="p-input-group mb-6 flex gap-2">
-    <input
-      type="text"
-      pInputText
-      [(ngModel)]="inputValue"
-      placeholder="Describe your task..."
-      class="flex-grow"
-    />
-    <p-button label="Add" icon="pi pi-plus" [rounded]="true" (click)="addTask()" severity="success"></p-button>
-  </div>
 
-  <div class="flex items-center gap-4">
+  <div class="flex flex-wrap items-center gap-4 p-4">
     <input
       pInputText
       [(ngModel)]="filterText"
       placeholder="Search"
-      class="flex-1 min-w-0"
+      class="flex-1 min-w-0 w-full sm:w-auto"
     />
-    <p-calendar
+    <p-datepicker
       [(ngModel)]="startDate"
       placeholder="From"
       dateFormat="yy-mm-dd"
       showIcon
-      class="w-40 min-w-0"
-    ></p-calendar>
-    <p-calendar
+      class="w-full sm:w-40 min-w-0"
+    ></p-datepicker>
+    <p-datepicker
       [(ngModel)]="endDate"
       placeholder="To"
       dateFormat="yy-mm-dd"
       showIcon
-      class="w-40 min-w-0"
-    ></p-calendar>
+      class="w-full sm:w-40 min-w-0"
+    ></p-datepicker>
     <p-button
       label="Sort by Date"
       pButtonIcon="pi pi-sort-alt"
       [rounded]="true"
       (click)="sortByDate()"
       severity="secondary"
+      class="w-full sm:w-auto"
     ></p-button>
   </div>
 
 
+
   <p-accordion [multiple]="true">
     <p-accordion-panel value="0">
-      <p-accordion-header>Pending</p-accordion-header>
+      <p-accordion-header>Pending
+        <ng-container *ngIf="filteredPendingTasks | async as pendingTasks">
+          {{ pendingTasks.length }}
+        </ng-container></p-accordion-header>
       <p-accordion-content>
         <ng-container *ngIf="filteredPendingTasks | async as pendingTasks">
           <p *ngIf="!pendingTasks.length" class="p-text-muted">No tasks</p>
 
           <div class="flex flex-col gap-4">
-            <p-card *ngFor="let task of pendingTasks" class="shadow-md hover: cursor-pointer">
+            <p-card *ngFor="let task of pendingTasks" class="shadow-md hover: cursor-pointer" (click)="onTaskSelected(task)" [class.selected]="(selectedTask$ | async)?.id === task.id">
               <ng-template pTemplate="title">
                 <span class="break-words whitespace-normal">{{ task.title }}</span>
               </ng-template>
@@ -66,7 +79,13 @@
                 <p><strong>Last updated:</strong> {{ task.date | date : 'short' }}</p>
               </ng-template>
               <ng-template pTemplate="footer">
-
+                <ng-container *ngIf="(selectedTask$ | async)?.id === task.id">
+                  <div class="flex gap-2">
+                    <p-button label="Start task" icon="pi pi-check" [rounded]="true" severity="success" (click)="changeStatus(task, 'In Progress')"></p-button>
+                    <p-button label="Delete" icon="pi pi-trash" [rounded]="true" severity="danger" (click)="removeTask(task)"></p-button>
+                    <p-button label="Close" [rounded]="true" severity="secondary" (click)="clearTaskSelected(); $event.stopPropagation()"></p-button>
+                  </div>
+                </ng-container>
               </ng-template>
             </p-card>
           </div>
@@ -77,13 +96,16 @@
 
 
     <p-accordion-panel value="1">
-      <p-accordion-header>In progress</p-accordion-header>
+      <p-accordion-header>In progress
+        <ng-container *ngIf="filteredInProgressTasks | async as inProgressTasks">
+          {{ inProgressTasks.length }}
+        </ng-container></p-accordion-header>
       <p-accordion-content>
         <ng-container *ngIf="filteredInProgressTasks | async as inProgressTasks">
           <p *ngIf="!inProgressTasks.length" class="p-text-muted">No tasks</p>
 
           <div class="flex flex-col gap-4">
-            <p-card *ngFor="let task of inProgressTasks" class="shadow-md">
+            <p-card *ngFor="let task of inProgressTasks"  class="shadow-md hover: cursor-pointer" (click)="onTaskSelected(task)" [class.selected]="(selectedTask$ | async)?.id === task.id">
               <ng-template pTemplate="title">
                 <span class="break-words whitespace-normal">{{ task.title }}</span>
               </ng-template>
@@ -91,7 +113,13 @@
                 <p><strong>Last updated:</strong> {{ task.date | date : 'short' }}</p>
               </ng-template>
               <ng-template pTemplate="footer">
-
+                <ng-container *ngIf="(selectedTask$ | async)?.id === task.id">
+                  <div class="flex gap-2">
+                    <p-button label="Finish task" icon="pi pi-check" [rounded]="true" severity="success" (click)="changeStatus(task, 'Completed')"></p-button>
+                    <p-button label="Delete" icon="pi pi-trash" [rounded]="true" severity="danger" (click)="removeTask(task)"></p-button>
+                    <p-button label="Close" [rounded]="true" severity="secondary" (click)="clearTaskSelected(); $event.stopPropagation()"></p-button>
+                  </div>
+                </ng-container>
               </ng-template>
             </p-card>
           </div>
@@ -101,13 +129,17 @@
     </p-accordion-panel>
 
     <p-accordion-panel value="2">
-      <p-accordion-header>Completed</p-accordion-header>
+      <p-accordion-header>Completed
+        <ng-container *ngIf="filteredCompletedTasks | async as completedTasks">
+          {{ completedTasks.length }}
+        </ng-container>
+      </p-accordion-header>
       <p-accordion-content>
         <ng-container *ngIf="filteredCompletedTasks | async as completedTasks">
           <p *ngIf="!completedTasks.length" class="p-text-muted">No tasks</p>
 
           <div class="flex flex-col gap-4">
-            <p-card *ngFor="let task of completedTasks" class="shadow-md">
+            <p-card *ngFor="let task of completedTasks"  class="shadow-md hover: cursor-pointer" (click)="onTaskSelected(task)" [class.selected]="(selectedTask$ | async)?.id === task.id">
               <ng-template pTemplate="title">
                 <span class="break-words whitespace-normal">{{ task.title }}</span>
               </ng-template>
@@ -115,7 +147,12 @@
                 <p><strong>Last updated:</strong> {{ task.date | date : 'short' }}</p>
               </ng-template>
               <ng-template pTemplate="footer">
-
+                <ng-container *ngIf="(selectedTask$ | async)?.id === task.id">
+                  <div class="flex gap-2">
+                    <p-button label="Delete" icon="pi pi-trash" [rounded]="true" severity="danger" (click)="removeTask(task)"></p-button>
+                    <p-button label="Close" [rounded]="true" severity="secondary" (click)="clearTaskSelected(); $event.stopPropagation()"></p-button>
+                  </div>
+                </ng-container>
               </ng-template>
             </p-card>
           </div>

@@ -38,7 +38,6 @@ export class ToDoListComponent {
   filterText: string = "";
   startDate: Date | null = null;
   endDate: Date | null = null;
-  selectedTask: TaskData | null = null;
   powerOn: boolean = false;
 
 

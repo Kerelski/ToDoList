@@ -4,6 +4,7 @@ import {BehaviorSubject, Observable} from 'rxjs';
 export type Status = 'Pending' | 'Completed' | 'In Progress';
 
 export interface TaskData{
+  id: number;
   title: string;
   date: Date;
   status: Status;
@@ -16,6 +17,7 @@ export interface TaskData{
 export class TaskService {
   private tasksSubject: BehaviorSubject<TaskData[]> = new BehaviorSubject<TaskData[]>([]);
   tasks$: Observable<TaskData[]> = this.tasksSubject.asObservable();
+  private nextId = 1;
 
   private selectedTaskSubject = new BehaviorSubject<TaskData | null>(null);
   selectedTask$ = this.selectedTaskSubject.asObservable();
@@ -30,9 +32,11 @@ export class TaskService {
     this.tasksSubject.next(tasks);
   }
 
-  addTask(task: TaskData): void {
-    this.tasksSubject.next([...this.tasks, task]);
+  addTask(task: Omit<TaskData, 'id'>): void {
+    const newTask: TaskData = { ...task, id: this.nextId++ };
+    this.tasksSubject.next([...this.tasks, newTask]);
   }
+
 
   removeTask(task: TaskData): void {
     this.setTasks(this.tasks.filter((t: TaskData) => t !== task));
